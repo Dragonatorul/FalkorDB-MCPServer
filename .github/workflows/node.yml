@@ -43,6 +43,7 @@ jobs:
     strategy:
       matrix:
         node-version: [18.x, 20.x]  # Run integration tests on fewer versions for speed
+      max-attempts: 3
 
     services:
       falkordb:
