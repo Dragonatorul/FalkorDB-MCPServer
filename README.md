@@ -1,5 +1,19 @@
 # FalkorDB MCP Server
 
+> **⚠️ PERSONAL FORK NOTICE**
+> 
+> This is a **personal fork** of the upstream [FalkorDB MCP Server](https://github.com/FalkorDB/FalkorDB-MCPServer) repository.
+> 
+> **Important:**
+> - 🚫 **Not actively maintained for public consumption**
+> - 🔒 **For personal use only**
+> - 💬 **Issues will most likely be ignored**
+> - 🆘 **No official support provided**
+> - ⚡ **DO NOT open issues in the upstream repository for problems related to this fork**
+> 
+> **For official support and active development, please visit the upstream repository:**
+> **https://github.com/FalkorDB/FalkorDB-MCPServer**
+
 A Model Context Protocol (MCP) server for FalkorDB, allowing AI models to query and interact with graph databases.
 
 ## Overview
