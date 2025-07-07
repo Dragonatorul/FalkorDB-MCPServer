@@ -43,7 +43,6 @@ jobs:
     strategy:
       matrix:
         node-version: [18.x, 20.x]  # Run integration tests on fewer versions for speed
-      max-attempts: 3
 
     services:
       falkordb:
@@ -80,8 +79,12 @@ jobs:
         timeout 30 bash -c 'until redis-cli -h localhost -p 6380 ping; do sleep 1; done'
         echo "FalkorDB is ready"
       
-    - name: Run integration tests
-      run: npm run test:integration
+    - name: Run integration tests with retry
+      uses: nick-invision/retry@v2
+      with:
+        timeout_minutes: 15
+        max_attempts: 3
+        command: npm run test:integration
       env:
         CI: true
         FALKORDB_HOST: localhost
