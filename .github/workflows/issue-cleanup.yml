@@ -1,15 +1,16 @@
+---
 name: Auto-close Stale Issues
 
 on:
   schedule:
     # Run daily at 2 AM UTC
-    - cron: '0 2 * * *'
-  workflow_dispatch:
+    - cron: "0 2 * * *"
+  workflow_dispatch: {}
 
 jobs:
   close-stale-issues:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Close stale issues
         uses: actions/github-script@v7
@@ -18,7 +19,7 @@ jobs:
             const repoOwner = context.repo.owner;
             const thirtyDaysAgo = new Date();
             thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-            
+
             // Get all open issues with the auto-responded label
             const issues = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
@@ -29,67 +30,72 @@ jobs:
               direction: 'asc',
               per_page: 100
             });
-            
+
             for (const issue of issues.data) {
               const issueCreatedAt = new Date(issue.created_at);
               const issueAuthor = issue.user.login;
-              
+
               // Skip if issue is less than 30 days old
               if (issueCreatedAt > thirtyDaysAgo) {
                 continue;
               }
-              
+
               // Skip if the issue author is the repository owner
               if (issueAuthor === repoOwner) {
                 continue;
               }
-              
+
               // Check if the repository owner has commented on the issue
               const comments = await github.rest.issues.listComments({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: issue.number
               });
-              
-              const ownerCommented = comments.data.some(comment => 
-                comment.user.login === repoOwner && 
-                comment.user.type === 'User' && 
-                !comment.body.includes('This is an automated response')
+
+              const ownerCommented = comments.data.some(
+                comment =>
+                  comment.user.login === repoOwner &&
+                  comment.user.type === 'User' &&
+                  !comment.body.includes('This is an automated response')
               );
-              
+
               // Only close if the owner hasn't responded
               if (!ownerCommented) {
-                console.log(`Closing stale issue #${issue.number}: ${issue.title}`);
-                
+                console.log(
+                  `Closing stale issue #${issue.number}: ${issue.title}`
+                );
+
                 // Add closing comment
                 await github.rest.issues.createComment({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   issue_number: issue.number,
-                  body: `## 🔒 Issue Auto-Closed
-
-This issue has been automatically closed after **30 days** of no response from the repository owner, as mentioned in our [initial automated response](https://github.com/${context.repo.owner}/${context.repo.repo}/issues/${issue.number}#issuecomment-${comments.data[0]?.id || 'initial'}).
-
-## 📋 Summary
-
-- **Created**: ${new Date(issue.created_at).toLocaleDateString()}
-- **Auto-responded**: ${new Date(issue.created_at).toLocaleDateString()}
-- **Auto-closed**: ${new Date().toLocaleDateString()}
-- **Reason**: No owner response within 30 days
-
-## 🔗 For Official Support
-
-Please remember that this is a **personal fork** and is not actively maintained for public consumption. For official support and active development, please visit:
-
-**🏠 Upstream Repository**: https://github.com/FalkorDB/FalkorDB-MCPServer
-
-**⚠️ Important**: Do **NOT** open issues in the upstream repository for problems related to this fork's implementation or features.
-
----
-
-*This is an automated closure. Thank you for your understanding.*`
+                  body: [
+                    "## 🔒 Issue Auto-Closed",
+                    "",
+                    "This issue has been automatically closed after **30 days** of no response from the repository owner, as mentioned in our [initial automated response](https://github.com/${context.repo.owner}/${context.repo.repo}/issues/${issue.number}#issuecomment-${comments.data[0]?.id || 'initial'}).",
+                    "",
+                    "## 📋 Summary",
+                    "",
+                    `- **Created**: ${new Date(issue.created_at).toLocaleDateString()}`,
+                    `- **Auto-responded**: ${new Date(issue.created_at).toLocaleDateString()}`,
+                    `- **Auto-closed**: ${new Date().toLocaleDateString()}`,
+                    "- **Reason**: No owner response within 30 days",
+                    "",
+                    "## 🔗 For Official Support",
+                    "",
+                    "Please remember that this is a **personal fork** and is not actively maintained for public consumption. For official support and active development, please visit:",
+                    "",
+                    "**🏠 Upstream Repository**: https://github.com/FalkorDB/FalkorDB-MCPServer",
+                    "",
+                    "**⚠️ Important**: Do **NOT** open issues in the upstream repository for problems related to this fork's implementation or features.",
+                    "",
+                    "---",
+                    "",
+                    "*This is an automated closure. Thank you for your understanding.*"
+                  ].join('\n')
                 });
-                
+
                 // Close the issue
                 await github.rest.issues.update({
                   owner: context.repo.owner,
@@ -97,7 +103,7 @@ Please remember that this is a **personal fork** and is not actively maintained 
                   issue_number: issue.number,
                   state: 'closed'
                 });
-                
+
                 // Add labels to indicate auto-closure
                 await github.rest.issues.addLabels({
                   owner: context.repo.owner,
@@ -105,12 +111,14 @@ Please remember that this is a **personal fork** and is not actively maintained 
                   issue_number: issue.number,
                   labels: ['auto-closed', 'stale']
                 });
-                
+
                 // Small delay to avoid rate limiting
                 await new Promise(resolve => setTimeout(resolve, 1000));
               } else {
-                console.log(`Keeping issue #${issue.number} open - owner has responded`);
+                console.log(
+                  `Keeping issue #${issue.number} open - owner has responded`
+                );
               }
             }
-            
+
             console.log('Stale issue cleanup completed');

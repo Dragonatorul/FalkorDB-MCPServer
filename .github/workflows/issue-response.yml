@@ -8,7 +8,7 @@ jobs:
   auto-respond:
     runs-on: ubuntu-latest
     if: github.event.issue.user.login != github.repository_owner
-    
+
     steps:
       - name: Add auto-response comment
         uses: actions/github-script@v7
@@ -16,41 +16,43 @@ jobs:
           script: |
             const issueAuthor = context.payload.issue.user.login;
             const repoOwner = context.repo.owner;
-            
+
             // Only respond if the issue author is not the repository owner
             if (issueAuthor !== repoOwner) {
-              const comment = `Hi @${issueAuthor},
-
-Thank you for taking the time to create this issue! 
-
-## ⚠️ Important Notice
-
-This is a **personal fork** that is **not actively maintained for public consumption**. This repository is primarily for personal use, and **issues will most likely not be addressed**.
-
-## 📅 Issue Policy
-
-- If the repository owner (@${repoOwner}) does not respond within **30 days**, this issue will be **automatically closed**
-- This helps keep the issue tracker clean and sets appropriate expectations
-
-## 🔗 Alternative Resources
-
-For **official support** and **active development**, please consider:
-
-**🏠 Upstream Repository:**
-- **Repository**: https://github.com/FalkorDB/FalkorDB-MCPServer
-- **Purpose**: Official FalkorDB MCP Server with active maintenance
-- **Support**: Community support and official issue tracking
-
-**⚠️ Important Disclaimer:**
-Please **DO NOT** open issues in the upstream repository for problems specifically related to **this fork's implementation, features, or artifacts**. Only use the upstream repository for issues with the original codebase.
-
-## 🤝 Thank You
-
-We appreciate your interest in this project and understanding of its maintenance status. For the best support experience, we recommend using the upstream repository for any FalkorDB MCP Server needs.
-
----
-
-*This is an automated response. The repository owner may still choose to respond if they have time and interest.*`;
+              const comment = [
+                `Hi @${issueAuthor},`,
+                "",
+                "Thank you for taking the time to create this issue!",
+                "",
+                "## ⚠️ Important Notice",
+                "",
+                "This is a **personal fork** that is **not actively maintained for public consumption**. This repository is primarily for personal use, and **issues will most likely not be addressed**.",
+                "",
+                "## 📅 Issue Policy",
+                "",
+                `- If the repository owner (@${repoOwner}) does not respond within **30 days**, this issue will be **automatically closed**`,
+                "- This helps keep the issue tracker clean and sets appropriate expectations",
+                "",
+                "## 🔗 Alternative Resources",
+                "",
+                "For **official support** and **active development**, please consider:",
+                "",
+                "**🏠 Upstream Repository:**",
+                "- **Repository**: https://github.com/FalkorDB/FalkorDB-MCPServer",
+                "- **Purpose**: Official FalkorDB MCP Server with active maintenance",
+                "- **Support**: Community support and official issue tracking",
+                "",
+                "**⚠️ Important Disclaimer:**",
+                "Please **DO NOT** open issues in the upstream repository for problems specifically related to **this fork's implementation, features, or artifacts**. Only use the upstream repository for issues with the original codebase.",
+                "",
+                "## 🤝 Thank You",
+                "",
+                "We appreciate your interest in this project and understanding of its maintenance status. For the best support experience, we recommend using the upstream repository for any FalkorDB MCP Server needs.",
+                "",
+                "---",
+                "",
+                "*This is an automated response. The repository owner may still choose to respond if they have time and interest.*"
+              ].join('\n');
 
               await github.rest.issues.createComment({
                 issue_number: context.issue.number,
